@@ -7,14 +7,14 @@ import com.kuriosityrobotics.shuttle.Duration;
 import java.util.concurrent.TimeoutException;
 
 /**
- * A synchronous abstraction for controlling a one-dimensional motor.
+ * A synchronous abstraction for controlling a motor, which drives towards a target position.
  * This class provides a synchronous wrapper for controlling an abstract device that can implement
- * {@link #setTargetPositionMeters0(double)} and {@link #isBusy()}.
+ * {@link #setTargetPositionMeters(double)} and {@link #isBusy()}.
  * <p>
  * This class is meant to wrap {@link com.qualcomm.robotcore.hardware.DcMotor}'s builtin
  * PID, which runs asynchronously on the embedded controller.
  */
-public abstract class LinearMotorControl implements MetricPositionSensor, MetricVelocitySensor {
+public abstract class LinearMotorControl {
 	protected final PreemptibleLock lock = new PreemptibleLock();
 	private final Duration timeout;
 
@@ -24,8 +24,8 @@ public abstract class LinearMotorControl implements MetricPositionSensor, Metric
 
 	/**
 	 * @param timeout The maximum time to wait for the motor to reach its target position.
-	 *                After this time is elapsed, execution will continue, regardless of whether the encoder
-	 *                has reached its target position.
+	 *                After this time is elapsed, execution will continue,
+	 *                regardless of whether the encoder has reached its target position.
 	 */
 	protected LinearMotorControl(Duration timeout) {
 		this.timeout = timeout;
@@ -40,7 +40,7 @@ public abstract class LinearMotorControl implements MetricPositionSensor, Metric
 	public void goToPosition(double position) throws InterruptedException, TimeoutException {
 		lock.lockInterruptibly();
 		try {
-			setTargetPositionMeters0(position);
+			setTargetPositionMeters(position);
 
 			Instant startTime = Instant.now();
 			while (isBusy()) {
@@ -73,8 +73,13 @@ public abstract class LinearMotorControl implements MetricPositionSensor, Metric
 
 	/**
 	 * Sets the target position of the motor, in meters.
+	 * This method is protected and can only be called by the class itself.
 	 *
 	 * @param position the position, in metres, that the motor should try to go to.
 	 */
-	protected abstract void setTargetPositionMeters0(double position);
+	protected abstract void setTargetPositionMeters(double position);
+
+	public abstract double getTargetPositionMeters();
+	public abstract double getPositionMeters();
+	public abstract double getVelocityMeters();
 }
