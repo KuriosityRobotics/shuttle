@@ -1,0 +1,2 @@
+include ':shuttle-hardware'
+include ':shuttle-core'
