@@ -1,9 +1,7 @@
 # Shuttle
-Shuttle is a lightweight concurrency library aimed to help control robots.
+Shuttle is a lightweight concurrency library aimed to help control robots that introduces synchronous and structured control flow into robot mechanism control, as explained [this blog post](https://max.xz.ax/blog/structured-concurrency-robot-control/).
 
-Shuttle aims to bring synchronous and structured control flow into robot mechanism control, as explained [this blog post](https://max.xz.ax/blog/structured-concurrency-robot-control/).
-
-Shuttle is comprised of two main parts, split into separate gradle modules.
+Shuttle is comprised of two main parts, split into separate gradle modules:
 
 `shuttle-core` contains:
 - An FTC-compatible backport of the Java 21 structured concurrency API.  You will interact with this through the HardwareTaskScope class.
