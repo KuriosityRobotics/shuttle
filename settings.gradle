@@ -1,2 +1,6 @@
 include ':shuttle-hardware'
 include ':shuttle-core'
+
+// I don't think this is necessary, but idk
+project(':shuttle-core').name = 'shuttle-core'
+project(':shuttle-hardware').name = 'shuttle-hardware'
