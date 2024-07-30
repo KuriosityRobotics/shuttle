@@ -1,5 +1,17 @@
 # Shuttle
+
 Shuttle is a lightweight concurrency library aimed to help control robots that introduces synchronous and structured control flow into robot mechanism control, as explained [this blog post](https://max.xz.ax/blog/structured-concurrency-robot-control/).
+
+```java
+public void releaseAndCollapse() throws InterruptedException {
+    try (var scope = HardwareTaskScope.open()) {
+        scope.fork(arm::collapse);
+        scope.fork(() -> slides.goToPosition(RETRACTED));
+
+        scope.join();
+    }
+}
+```
 
 Shuttle is comprised of two main parts, split into separate gradle modules:
 
@@ -10,6 +22,7 @@ Shuttle is comprised of two main parts, split into separate gradle modules:
 `shuttle-hardware` contains:
 - Blocking abstractions for FTC motors.  You will interact with these by extending the ServoControl and LinearMotorControl classes.
 
+Examples for how Shuttle can be used are located in our [Center Stage](https://github.com/KuriosityRobotics/center-stage) repository.
 # Installation
 Shuttle can be added to the FTC SDK by adding the Kuriosity maven repository to `TeamCode/build.gradle`, and adding the following dependencies in the `implementation` section:
 ```gradle
