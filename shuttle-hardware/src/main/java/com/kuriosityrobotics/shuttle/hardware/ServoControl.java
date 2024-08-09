@@ -23,9 +23,9 @@ public abstract class ServoControl {
 
 	private final PreemptibleLock lock = new PreemptibleLock();
 
-	private Double previousServoPosition = null; // the last known servo position
-	private Double currentServoTargetPosition = null; // where the servo is currently told to go to; only null at beginning
-	private Instant movementStartTime = null; // when the target Servo position was set
+	private volatile Double previousServoPosition = null; // the last known servo position
+	private volatile Double currentServoTargetPosition = null; // where the servo is currently told to go to; only null at beginning
+	private volatile Instant movementStartTime = null; // when the target Servo position was set
 
 	public ServoControl(Servo servo, double servoSpeedRads, double rangeRad, boolean flipDirection, double zeroPosition) {
 		this.servo = servo;
@@ -36,7 +36,7 @@ public abstract class ServoControl {
 	}
 
 	/**
-	 * This Java function sets the target servo position and sleeps for an estimated time to reach that
+	 * Sets the target servo position and sleeps for an estimated time to reach that
 	 * position while holding a lock.
 	 *
 	 * @param position The desired angle position that the servo motor should move to.
@@ -44,7 +44,7 @@ public abstract class ServoControl {
 	public void goToAngle(double position) throws InterruptedException {
 		lock.lockInterruptibly();
 		try {
-			setTargetServoPosition0(position);
+			setTargetPosition(position);
 			Thread.sleep(estimateTimeToPosition(position).toMillis());
 		} finally {
 			lock.unlock();
@@ -64,7 +64,7 @@ public abstract class ServoControl {
 	}
 
 	/**
-	 * This function returns the current position of a servo motor, based on its previous position, target
+	 * Returns the current position of a servo motor, based on its previous position, target
 	 * position, and movement speed.
 	 *
 	 * @return The method returns an Optional object that may contain a Double value representing the
@@ -93,7 +93,7 @@ public abstract class ServoControl {
 	}
 
 	/**
-	 * `estimateTimeToPosition` estimates the time required to reach a target position, given the current
+	 * Estimates the time required to reach a target position, given the current
 	 * position and the servo's speed. It assumes that the servo is moving at a constant speed.
 	 *
 	 * @param targetServoPosition The target position of the servo motor
@@ -137,7 +137,7 @@ public abstract class ServoControl {
 	 *
 	 * @param targetPositionRad The target position of the servo in radians.
 	 */
-	private void setTargetServoPosition0(double targetPositionRad) {
+	private void setTargetPosition(double targetPositionRad) {
 		conservativelySetPreviousPosition(targetPositionRad);
 
 
