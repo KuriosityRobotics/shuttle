@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.kuriosityrobotics.shuttle'
-version = '1.0'
+version = '1.1'
 
 repositories {
     mavenCentral()
@@ -32,7 +32,7 @@ publishing {
             from components.java
             groupId 'com.kuriosityrobotics.shuttle'
             artifactId 'shuttle-core'
-            version '1.0'
+            version '1.1'
         }
     }
 

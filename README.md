@@ -35,7 +35,7 @@ repositories {
 dependencies {
     // other stuff
 
-    implementation "com.kuriosityrobotics.shuttle:shuttle-core:1.0"
+    implementation "com.kuriosityrobotics.shuttle:shuttle-core:1.1"
     implementation "com.kuriosityrobotics.shuttle:shuttle-hardware:1.0"
 }
 ```
