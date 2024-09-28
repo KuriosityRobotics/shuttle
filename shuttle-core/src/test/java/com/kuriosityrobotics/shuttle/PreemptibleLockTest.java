@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.LockSupport;
 
@@ -303,11 +305,9 @@ class PreemptibleLockTest {
 			assertDoesNotThrow(lock::lockInterruptibly);
 			assertDoesNotThrow(lock::unlock);
 
-			t.start();
-			LockSupport.park();
-
-			assertTrue(Thread.currentThread().isInterrupted());
-			assertThrows(InterruptedException.class, lock::lockInterruptibly);
+			t.start(); // start new thread to preempt
+			// wait for preemption
+			assertThrows(InterruptedException.class, () -> Thread.sleep(Long.MAX_VALUE));
 		} finally {
 			lock.unlock();
 		}
@@ -316,5 +316,79 @@ class PreemptibleLockTest {
 		assertTimeout(Duration.ofMillis(200), () -> lock.tryLock(100, TimeUnit.MILLISECONDS));
 		assertTimeout(Duration.ofMillis(100), () -> t.join());
 		assertTrue(lock.tryLock());
+	}
+
+	@RepeatedTest(10)
+	void tryLockThrows() throws InterruptedException {
+		PreemptibleLock lock = new PreemptibleLock();
+
+		Thread.currentThread().interrupt();
+		assertThrows(InterruptedException.class, lock::lockInterruptibly); // interruptible
+		assertFalse(lock.isLocked());
+		assertFalse(Thread.currentThread().isInterrupted()); // should clear when thrown
+
+		Thread.currentThread().interrupt();
+		assertDoesNotThrow(lock::lock); // uninterruptible
+		assertTrue(lock.isLocked());
+		assertTrue(Thread.currentThread().isInterrupted()); // unchanged
+
+		assertDoesNotThrow(lock::unlock);
+		assertTrue(Thread.currentThread().isInterrupted()); // unchanged
+	}
+
+	@RepeatedTest(10)
+	void testFairness() throws InterruptedException {
+		final int threadCount = 10;
+		final PreemptibleLock lock = new PreemptibleLock();
+
+		final List<Thread> lockAcquireOrder = new ArrayList<>(threadCount); // guarded by lock
+		final List<Thread> threadStartOrder = new ArrayList<>(threadCount);
+
+		lock.lock();
+		try {
+			for (int i = 0; i < threadCount; i++) {
+				Thread t = new Thread(() -> {
+					try {
+						lock.lock();
+						try {
+							lockAcquireOrder.add(Thread.currentThread());
+						} finally {
+							lock.unlock();
+						}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
+
+				threadStartOrder.add(t);
+				t.start();
+
+				// wait until contended
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// do nothing
+				}
+			}
+		} finally {
+			lock.unlock();
+		}
+
+		assertTimeout(Duration.ofMillis(100), () -> {
+			for (Thread t : threadStartOrder) {
+				t.join();
+			}
+		});
+
+		assertFalse(lock.isLocked());
+		assertFalse(Thread.currentThread().isInterrupted());
+
+		// compare results
+		lock.lock();
+		try {
+			assertEquals(threadStartOrder, lockAcquireOrder);
+		} finally {
+			lock.unlock();
+		}
 	}
 }

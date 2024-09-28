@@ -25,6 +25,9 @@ public class PreemptibleLock implements Lock {
 		outerLock = new ReentrantLock(fair);
 	}
 
+	/**
+	 * @return an estimate of whether the lock is locked.
+	 */
 	public boolean isLocked() {
 		acquisitionLock.lock();
 		try {
@@ -63,12 +66,6 @@ public class PreemptibleLock implements Lock {
 		} finally {
 			acquisitionLock.unlock();
 		}
-	}
-
-	/** Guarded by acquisitionLock */
-	private void setToCurrentOwner() {
-		owner = Thread.currentThread();
-		holdCount++;
 	}
 
 	/** Guarded by acquisitionLock */
