@@ -1,6 +1,6 @@
 # Shuttle
 
-Shuttle is a lightweight concurrency library aimed to help control robots that introduces synchronous and structured control flow into robot mechanism control, as explained [this blog post](https://max.xz.ax/blog/structured-concurrency-robot-control/).
+Shuttle is a lightweight concurrency library aimed to help control robots that introduces synchronous and structured control flow into robot mechanism control, as explained in [this blog post](https://max.xz.ax/blog/structured-concurrency-robot-control/).
 
 ```java
 public void releaseAndCollapse() throws InterruptedException {
