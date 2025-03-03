@@ -101,7 +101,7 @@ class PreemptibleLockTest {
 			lock.unlock();
 		}
 
-		latch.arrive(); // let them start
+		latch.arriveAndAwaitAdvance(); // let them start
 		latch.arriveAndAwaitAdvance(); // wait for them to finish
 
 		// Check for race conditions or deadlocks
