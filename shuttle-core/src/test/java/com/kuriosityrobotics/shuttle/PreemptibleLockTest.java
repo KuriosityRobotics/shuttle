@@ -339,7 +339,7 @@ class PreemptibleLockTest {
 	@RepeatedTest(10)
 	void testFairness() throws InterruptedException {
 		final int threadCount = 10;
-		final PreemptibleLock lock = new PreemptibleLock();
+		final PreemptibleLock lock = new PreemptibleLock(true);
 
 		final List<Thread> lockAcquireOrder = new ArrayList<>(threadCount); // guarded by lock
 		final List<Thread> threadStartOrder = new ArrayList<>(threadCount);
